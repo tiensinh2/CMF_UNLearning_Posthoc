@@ -1,0 +1,3 @@
+#from .linear_probe_old import linear_probe, linear_probe_last_layer, linear_probe_CMF, linear_probe_CMF_RemoveFC, plot_LP, run_linear_probe_on_fresh_clone
+from .nc import nc_metrics
+from .linear_prob import linear_probe_CMF_RemoveFC, run_linear_probe_on_fresh_clone, linear_probe_last_layer

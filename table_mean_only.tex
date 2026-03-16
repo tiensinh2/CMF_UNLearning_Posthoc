@@ -1,0 +1,63 @@
+\begingroup
+\setlength{\tabcolsep}{4pt}
+\small
+
+\begin{table*}[t]
+\centering
+\caption{
+Evaluation of machine unlearning (MU) methods on \textbf{ViT-S/16} across CIFAR-10, CIFAR-100, and Tiny-ImageNet.
+We report mean accuracy ($\pm$ standard deviation) on \textbf{retain} and \textbf{forget} subsets under different unlearning bucket sizes (single vs.\ multi-class).
+Results are shown for three evaluation heads: the full model classifier, a linear probe on frozen features (LP), and the Nearest Class-Center (NC) classifier.
+All experiments are based on models pre-trained on \textbf{ImageNet}.
+For ViT-S/16, the pre-trained model is obtained by fine-tuning the ImageNet-pre-trained backbone on the full target dataset.
+\emph{Retrain} refers to a model obtained by fine-tuning the same pre-trained backbone using only the retain subset, serving as an oracle baseline that fully removes the target data.
+All unlearning methods are likewise initialized from the same pre-trained model.
+All values are averaged over multiple runs..
+}
+\label{tab:Vit_original_linearprobe}
+\vspace{-.15in}
+\resizebox{1.0\linewidth}{!}{
+\begin{tabular}{l l cc cc cc cc cc cc}
+\toprule
+\multirow{3}{*}{\textbf{Method}}
+  & \multirow{3}{*}{\textbf{Layers Evaluated}}
+  & \multicolumn{4}{c}{\textbf{CIFAR-10}}
+  & \multicolumn{4}{c}{\textbf{CIFAR-100}}
+  & \multicolumn{4}{c}{\textbf{Tiny-ImageNet}}\\
+\cmidrule(lr){3-6}\cmidrule(lr){7-10}\cmidrule(lr){11-14}
+  &  & \multicolumn{2}{c}{1} & \multicolumn{2}{c}{3}
+     & \multicolumn{2}{c}{1} & \multicolumn{2}{c}{10}
+     & \multicolumn{2}{c}{1} & \multicolumn{2}{c}{20}\\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}\cmidrule(lr){11-12}\cmidrule(lr){13-14}
+  &  & Retain & Forget & Retain & Forget & Retain & Forget & Retain & Forget & Retain & Forget & Retain & Forget \\
+\midrule
+\multirow{3}{*}{Original} & Full Model & 98.20 & 98.20 & 98.16 & 98.29 & 90.09 & 92.00 & 90.09 & 90.32 & 84.90 & 79.20 & 84.81 & 85.44 \\
+ & Feature Mapping (LP) & 98.17 & 98.17 & 98.15 & 98.22 & 89.93 & 92.20 & 89.94 & 90.08 & 84.97 & 81.20 & 84.87 & 85.68 \\
+ & NC Accuracy & 98.06 & 98.06 & 98.02 & 98.15 & 89.62 & 93.00 & 89.67 & 89.58 & 83.62 & 80.40 & 83.49 & 84.70 \\
+
+ \midrule
+\multirow{3}{*}{retrain} & Full Model & 98.46 & 0.00 & 98.61 & 0.00 & 89.95 & 0.00 & 90.10 & 0.00 & 83.85 & 0.00 & 84.14 & 0.00 \\
+ & Feature Mapping (LP) & 98.28 & 97.71 & 98.17 & 97.35 & 90.32 & 90.80 & 90.13 & 87.82 & 84.47 & 77.60 & 84.45 & 81.44 \\
+ & NC Accuracy & 98.12 & 94.24 & 97.98 & 94.51 & 89.24 & 87.80 & 89.31 & 81.88 & 82.93 & 74.80 & 82.74 & 78.64 \\
+
+ 
+\midrule
+\multirow{3}{*}{random label} & Full Model & 98.50 & 0.00 & 98.69 & 0.00 & 90.59 & 0.00 & 90.79 & 0.10 & 85.87 & 7.20 & 86.23 & 16.24 \\
+ & Feature Mapping (LP) & 98.35 & 98.64 & 98.15 & 98.26 & 90.47 & 94.00 & 90.26 & 88.32 & 85.69 & 82.80 & 85.57 & 85.10 \\
+ & NC Accuracy & 97.50 & 99.57 & 96.46 & 97.84 & 90.01 & 96.00 & 89.56 & 82.70 & 84.22 & 82.40 & 84.42 & 83.92 \\
+\midrule
+\multirow{3}{*}{salun} & Full Model & 98.46 & 0.00 & 98.68 & 0.00 & 90.58 & 0.20 & 90.64 & 0.18 & 85.64 & 7.60 & 85.99 & 15.72 \\
+ & Feature Mapping (LP) & 98.33 & 98.59 & 98.13 & 98.26 & 90.36 & 93.60 & 90.22 & 88.24 & 85.50 & 81.60 & 85.33 & 84.74 \\
+ & NC Accuracy & 97.51 & 99.51 & 96.61 & 97.85 & 89.96 & 95.60 & 89.33 & 81.68 & 84.16 & 82.00 & 84.11 & 83.46 \\
+
+\midrule
+\multirow{3}{*}{NegGrad+} & Full Model & 98.00 & 0.00 & 98.21 & 6.63 & 89.88 & 0.00 & 89.85 & 6.14 & 85.12 & 0.00 & 85.48 & 0.52 \\
+ & Feature Mapping (LP) & 98.03 & 96.15 & 97.57 & 95.76 & 90.24 & 87.20 & 89.96 & 82.98 & 84.95 & 75.20 & 84.74 & 67.50 \\
+ & NC Accuracy & 94.88 & 87.05 & 93.86 & 73.38 & 89.00 & 86.80 & 89.20 & 43.40 & 83.29 & 84.40 & 82.94 & 57.16 \\
+
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+\endgroup

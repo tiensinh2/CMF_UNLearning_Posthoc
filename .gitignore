@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.env
+
+# Large model checkpoints
+*.pt
+checkpoints/
+*.pth
+*.bin
+
+# Data
+data/
+*.csv
+*.json
+
+# Logs
+*.log
