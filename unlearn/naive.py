@@ -343,12 +343,18 @@ def unlearn_naive_CMF(
         print("model device:", next(model.parameters()).device)
         
         epoch_start = time.time()
-        starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+        # BUG-FIX: guard CUDA Events — torch.cuda.Event fails on CPU
+        if device.type == "cuda":
+            starter = torch.cuda.Event(enable_timing=True)
+            ender   = torch.cuda.Event(enable_timing=True)
+        else:
+            starter = ender = None
         for i, (x,y) in enumerate(naive_retain_loader):
             
             x, y = x.to(device), y.to(device)
 
-            starter.record()
+            if starter is not None:
+                starter.record()
             optimizer.zero_grad()
             
             #print("Get fixed CMF weights")
@@ -409,11 +415,15 @@ def unlearn_naive_CMF(
             if clip is not None:
                 torch.nn.utils.clip_grad_norm_(model.parameters(), clip)
             optimizer.step()
-            ender.record()
+            if ender is not None:
+                ender.record()
             if i % 50 == 0:
-                torch.cuda.synchronize()
-                ms = starter.elapsed_time(ender)  # GPU compute ms
-                print(f"i={i} loss={total_loss_item:.4f} gpu_step_ms={ms:.1f}")
+                if ender is not None and device.type == "cuda":
+                    torch.cuda.synchronize()
+                    ms = starter.elapsed_time(ender)
+                    print(f"i={i} loss={total_loss_item:.4f} gpu_step_ms={ms:.1f}")
+                else:
+                    print(f"i={i} loss={total_loss_item:.4f}")
 
         epoch_end = time.time()
         print(f"[Epoch {epoch}] wall time: {epoch_end - epoch_start:.1f}s")
@@ -422,8 +432,9 @@ def unlearn_naive_CMF(
         # End-of-epoch evaluation
         # -------------------------
         model.eval()
-        Wn, Hn, G_WW, G_HH, G_WH = model.recompute_cmf(train_loader, device=device)
-        #G_WW_list.append(G_WW); G_HH_list.append(G_HH); G_WH_list.append(G_WH)
+        # BUG-FIX: do NOT unpack the 5-tuple — recompute_cmf() returns None
+        # in the new pipeline (values are stored internally); just call it plain.
+        model.recompute_cmf(train_loader, device=device)
 
         # Classifier evaluation\
         with torch.no_grad():

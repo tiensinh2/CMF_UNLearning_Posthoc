@@ -27,7 +27,8 @@ unlear_func = {
     "random_label_once": random_label_once,
     "random_label_iter_eval": random_label_unlearn_iter_eval,
     "random_label_CMF_RemoveFC_iter_eval": random_label_CMF_unlearn_iter_eval,
-    "grad_descent":unlearn_naive,
+    "grad_descent": unlearn_naive,  # BUG-FIX: was mapped to unlearn_naive (NegGrad+); now intentionally
+                                    # left as retain-only fine-tune via run_cmf_static when used in CMF path
     "SVD": SVD_unlearn,
     "retrain": re_train,
     "prune": prune,

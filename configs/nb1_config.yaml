@@ -1,0 +1,65 @@
+# =============================================================================
+# nb1_config.yaml
+# External configuration for 01_train_full.ipynb.
+# Change ONLY this file to switch datasets, seeds, or hyperparameters.
+# Never hard-code any of these values inside the notebook.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Experiment identity
+# ---------------------------------------------------------------------------
+experiment_name: "cifar10_resnet18"   # used in filenames / log prefix
+suffix: ""                            # appended to all output filenames; e.g. "_ablation_noWU"
+
+# ---------------------------------------------------------------------------
+# Dataset & architecture
+# ---------------------------------------------------------------------------
+dataset: "cifar10"      # cifar10 | cifar100 | tinyimagenet | imagenette
+arch: "resnet18"        # resnet18 | resnet34 | resnet50 | vit_s_16 | vit_b_16 ...
+data_path: "./data"
+
+# ---------------------------------------------------------------------------
+# Protocol
+# ---------------------------------------------------------------------------
+# List of integer class indices to generate forget splits for.
+# Use null to default to ALL classes (0 .. num_classes-1), resolved at runtime.
+forget_classes: null    # null → all classes; or e.g. [0, 1, 2]
+
+# Random seeds for full training runs.  Each seed produces one checkpoint.
+SEEDS: [0]              # extend to [0, 1, 2] for multi-seed runs
+
+# ---------------------------------------------------------------------------
+# Test / CI mode
+# ---------------------------------------------------------------------------
+# When true the notebook uses a small fraction of epochs so CI finishes fast.
+# Checkpoint filenames get a "_test" suffix so they don't pollute real results.
+TEST_MODE: false
+TEST_EPOCHS_SCALE: 0.1   # fraction of paper epochs used when TEST_MODE=true
+
+# ---------------------------------------------------------------------------
+# Output directories
+# ---------------------------------------------------------------------------
+pretrain_dir: "./checkpoints/pretrain"   # pretrained model checkpoints
+splits_dir:   "./checkpoints/splits"     # per-class split JSON files
+results_dir:  "./results"                # summary CSVs / audit logs
+
+# ---------------------------------------------------------------------------
+# DataLoader settings
+# ---------------------------------------------------------------------------
+batch_size:       128
+test_batch_size:  256
+num_workers:      4
+
+# ---------------------------------------------------------------------------
+# Hyperparameter overrides  (all null → use paper_hparams.py defaults)
+# ---------------------------------------------------------------------------
+# Set a key to a value to override the paper default for an ablation.
+# Keys must match PRETRAIN_CFG fields in paper_hparams.py.
+# Paper defaults (CIFAR-10 / CIFAR-100): lr=0.01, epochs=300
+# Tiny-ImageNet override:                lr=0.05  (keep epochs=300)
+# Set a key below ONLY for intentional ablations.  All null → PRETRAIN_CFG defaults.
+hparam_overrides:
+  # lr: 0.05              # uncomment for Tiny-ImageNet
+  # epochs: 50            # uncomment to shorten training (ablation)
+  # warmup_epochs: 0      # uncomment to disable warmup
+  # early_stop_patience: 20

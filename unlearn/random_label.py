@@ -1401,15 +1401,10 @@ def random_label_CMF_unlearn(
             if getattr(args, "dry_run", False):
                 break  # onlyuseinvalidation
 
-        # ---- 4.3 evaluate + useactually/reallabel CMF classifier ----
+        # ---- 4.3 evaluate + CMF classifier update ----
         model.eval()
-        # key：thisinuse train_loader 's/of【actually/reallabel】intoline/executeclassaveragevalue/
-        Wn, Hn, G_WW, G_HH, G_WH = model.recompute_cmf(train_loader, device=device)
-        Wn_list.append(Wn)
-        Hn_list.append(Hn)
-        G_WW_list.append(G_WW)
-        G_HH_list.append(G_HH)
-        G_WH_list.append(G_WH)
+        # BUG-FIX: do NOT unpack 5-tuple — just call plain
+        model.recompute_cmf(train_loader, device=device)
 
         print(f"[Epoch {epoch}] Evaluating after CMF update...")
         retain_acc, forget_acc, metric = test(
@@ -1696,14 +1691,10 @@ def random_label_once_CMF_unlearn(
             if getattr(args, "dry_run", False):
                 break
 
-        # ---- 4.3 CMF morenew + test ----
+        # ---- 4.3 CMF update + test ----
         model.eval()
-        Wn, Hn, G_WW, G_HH, G_WH = model.recompute_cmf(train_loader, device=device)
-        Wn_list.append(Wn)
-        Hn_list.append(Hn)
-        G_WW_list.append(G_WW)
-        G_HH_list.append(G_HH)
-        G_WH_list.append(G_WH)
+        # BUG-FIX: do NOT unpack 5-tuple — just call plain
+        model.recompute_cmf(train_loader, device=device)
 
         print(f"[Epoch {epoch}] Evaluating after CMF update...")
         retain_acc, forget_acc, metric = test(
