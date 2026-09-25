@@ -1,0 +1,64 @@
+# =============================================================================
+# nb2_config_cifar100.yaml
+# NB2 (Oracle Retrain) configuration for CIFAR-100 / ResNet-18.
+# Paper reference: §A.3 (single-class: {0,1,2,3,5}), Table 4 (Retain-only
+# Retrain row), §A.4.
+#
+# Consume artifacts from NB1 that used nb1_config_cifar100.yaml.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Experiment identity
+# Must match the experiment_name used in NB1 so that NB2 can locate the
+# pretrain checkpoint and split files produced there.
+# ---------------------------------------------------------------------------
+experiment_name: "cifar100_resnet18"
+suffix: ""                       # keep in sync with NB1 suffix
+
+# ---------------------------------------------------------------------------
+# Dataset & architecture
+# ---------------------------------------------------------------------------
+dataset:   "cifar100"            # 100 classes, 50 000 train / 10 000 test
+arch:      "resnet18"            # paper: ResNet-18 on CIFAR-100
+data_path: "./data"
+
+# ---------------------------------------------------------------------------
+# Protocol
+# §A.3: single-class sweep — paper evaluates representative classes {0,1,2,3,5}.
+# Must match the forget_classes used in NB1 to ensure all split files exist.
+# Set to null to sweep ALL 100 classes instead.
+# ---------------------------------------------------------------------------
+forget_classes: [0, 1, 2, 3, 5]
+
+# One seed for a single run; extend to [0, 1, 2] for multi-seed results.
+SEEDS: [0]
+
+# ---------------------------------------------------------------------------
+# Test / CI mode  (set true for a fast smoke-test, adds "_test" suffix)
+# ---------------------------------------------------------------------------
+TEST_MODE: false
+TEST_EPOCHS_SCALE: 0.1
+
+# ---------------------------------------------------------------------------
+# Output directories
+# ---------------------------------------------------------------------------
+pretrain_dir: "./checkpoints/pretrain"
+splits_dir:   "./checkpoints/splits"
+oracle_dir:   "./checkpoints/oracle"
+results_dir:  "./results"
+
+# ---------------------------------------------------------------------------
+# DataLoader settings  (Table 4: batch=128)
+# ---------------------------------------------------------------------------
+batch_size:      128
+test_batch_size: 256
+num_workers:     4
+
+# ---------------------------------------------------------------------------
+# Hyperparameter overrides  (null → paper_hparams.RETRAIN_CFG defaults)
+# Oracle paper defaults for CIFAR-100: lr=0.01, epochs=200, wd=5e-4, warmup=5
+# These values are already set in RETRAIN_CFG; only override here for ablations.
+# ---------------------------------------------------------------------------
+hparam_overrides:
+  # epochs: 50            # ablation: shorten Oracle training
+  # warmup_epochs: 0      # ablation: no warmup
