@@ -1,0 +1,80 @@
+# =============================================================================
+# nb3_config_cifar10.yaml
+# NB3 (No-CMF Unlearning Baselines) configuration for CIFAR-10 / ResNet-18.
+# Paper reference: §A.3 (single-class sweep {0}..{9}), Table 4 (method rows),
+# §A.4.
+#
+# Consumes artifacts from NB1 that used nb1_config_cifar10.yaml:
+#   - pretrain checkpoint per seed
+#   - split JSON files per (seed, forget_class)
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Experiment identity
+# Must match the experiment_name used in NB1 so that NB3 can locate the
+# pretrain checkpoint and split files produced there.
+# ---------------------------------------------------------------------------
+experiment_name: "cifar10_resnet18"
+suffix: ""                       # keep in sync with NB1 suffix
+
+# ---------------------------------------------------------------------------
+# Dataset & architecture
+# ---------------------------------------------------------------------------
+dataset:   "cifar10"             # 10 classes, 50 000 train / 10 000 test
+arch:      "resnet18"            # paper: ResNet-18 on CIFAR-10
+data_path: "/kaggle/input/datasets/kiethe/standard-cifar-10"
+
+# ---------------------------------------------------------------------------
+# Protocol
+# §A.3: single-class sweep — all 10 classes {0}..{9}.
+# null → resolved at runtime to list(range(num_classes)) = [0..9]
+# ---------------------------------------------------------------------------
+forget_classes: null
+
+# One seed for a single run; extend to [0, 1, 2] for multi-seed results.
+SEEDS: [0]
+
+# ---------------------------------------------------------------------------
+# Test / CI mode  (set true for a fast smoke-test, adds "_test" suffix)
+# ---------------------------------------------------------------------------
+TEST_MODE: false
+TEST_EPOCHS_SCALE: 0.1
+
+# ---------------------------------------------------------------------------
+# Methods to run (NB3-specific)
+# All 6 no-CMF baseline methods from Table 4.
+# Remove entries here to skip specific methods.
+# ---------------------------------------------------------------------------
+methods:
+  - grad_ascent_descent
+  - random_label
+  - salun
+  - scrub
+  - tarun
+  - svd
+
+# ---------------------------------------------------------------------------
+# Output directories
+# ---------------------------------------------------------------------------
+# Kaggle: NB1 artifacts (pretrain + splits) are in the flat dataset folder.
+pretrain_dir:    "/kaggle/input/datasets/kiethe/standard-cifar-10"
+splits_dir:      "/kaggle/input/datasets/kiethe/standard-cifar-10"
+unlearn_no_cmf_dir: "/kaggle/working/checkpoints/unlearn_no_cmf"
+results_dir:     "/kaggle/working/results"
+
+# ---------------------------------------------------------------------------
+# DataLoader settings  (Table 4: batch=128)
+# ---------------------------------------------------------------------------
+batch_size:      128
+test_batch_size: 256
+num_workers:     2          # Kaggle kernels typically have 2 CPU cores
+
+# ---------------------------------------------------------------------------
+# Hyperparameter overrides  (null → paper_hparams.METHOD_CFG defaults per method)
+# Per-method defaults for CIFAR-10 are already set in UNLEARN_CFG_BY_METHOD;
+# only override here for ablations.
+# ---------------------------------------------------------------------------
+hparam_overrides:
+  # Example ablation overrides:
+  # grad_ascent_descent_lr: 5e-4   # override lr for NegGrad+
+  # scrub_msteps: 3                # override SCRUB msteps

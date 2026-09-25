@@ -365,15 +365,30 @@ POSTHOC_CFG = dict(
 # Checkpoint directory layout
 # ---------------------------------------------------------------------------
 CKPT_DIRS = dict(
-    pretrain   = "./checkpoints/pretrain",
-    splits     = "./checkpoints/splits",
-    oracle     = "./checkpoints/oracle",
-    no_cmf     = "./checkpoints/no_cmf",
-    cmf_static = "./checkpoints/cmf_static",
-    posthoc    = "./checkpoints/posthoc",
-    stage3     = "./checkpoints/stage3",
-    results    = "./results",
+    pretrain        = "./checkpoints/pretrain",
+    splits          = "./checkpoints/splits",
+    oracle          = "./checkpoints/oracle",
+    unlearn_no_cmf  = "./checkpoints/unlearn_no_cmf",   # NB3 — no-CMF baselines
+    no_cmf          = "./checkpoints/no_cmf",
+    cmf_static      = "./checkpoints/cmf_static",
+    posthoc         = "./checkpoints/posthoc",
+    stage3          = "./checkpoints/stage3",
+    results         = "./results",
 )
+
+# ---------------------------------------------------------------------------
+# NB3 — per-method unlearn hyperparameters (no-CMF baselines)
+#
+# This dict is the single authoritative source consumed by NB3
+# (03_unlearn_no_cmf.ipynb).  Values are the same as METHOD_CFG above;
+# they are re-exported here under the name UNLEARN_CFG_BY_METHOD so that
+# NB3 can import a single, self-describing symbol rather than aliasing
+# METHOD_CFG internally.
+#
+# Keys deliberately mirror METHOD_CFG exactly so that
+#   UNLEARN_CFG_BY_METHOD[method]  is always valid for all 6 base methods.
+# ---------------------------------------------------------------------------
+UNLEARN_CFG_BY_METHOD = METHOD_CFG
 
 # ---------------------------------------------------------------------------
 # ViT fine-tuning config — Table 5 (ViT-S/16, ImageNet-pretrained backbone)
