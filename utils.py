@@ -245,6 +245,32 @@ class LogitsToLogProb(nn.Module):
 
 
 def get_dataset(args):
+    # ── Kaggle: /kaggle/input is read-only; redirect to writable working dir ──
+    import os as _os, pathlib as _pl
+    if _pl.Path("/kaggle/input").exists() and str(args.data_path).startswith("/kaggle/input"):
+        _writable = "/kaggle/working/data"
+        _pl.Path(_writable).mkdir(parents=True, exist_ok=True)
+        _FOLDER_MAP = {"cifar10": "cifar-10-batches-py", "cifar100": "cifar-100-python",
+                       "mnist": "MNIST", "fmnist": "FashionMNIST"}
+        _TARBALL_MAP = {"cifar10": "cifar-10-python.tar.gz", "cifar100": "cifar-100-python.tar.gz"}
+        _folder = _FOLDER_MAP.get(args.dataset)
+        if _folder and not _pl.Path(_writable, _folder).exists():
+            import glob as _glob
+            # 1) symlink pre-extracted folder if found
+            _found = _glob.glob(f"/kaggle/input/**/{_folder}", recursive=True)
+            if _found:
+                _pl.Path(_writable, _folder).symlink_to(_found[0])
+            else:
+                # 2) extract tarball if found
+                _tb = _TARBALL_MAP.get(args.dataset)
+                _tb_found = _glob.glob(f"/kaggle/input/**/{_tb}", recursive=True) if _tb else []
+                if _tb_found:
+                    import tarfile as _tf
+                    with _tf.open(_tb_found[0], "r:gz") as _t:
+                        _t.extractall(_writable)
+        args.data_path = _writable
+        print(f"[Kaggle] get_dataset: data_path redirected to {_writable}")
+
     arch_lower = getattr(args, "arch", "").lower()
     is_vit = "vit" in arch_lower   #  vit_tiny, vit_small, vit_b_16, ...
     is_resnet = "resnet" in arch_lower
