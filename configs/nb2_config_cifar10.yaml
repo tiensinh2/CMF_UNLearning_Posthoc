@@ -20,7 +20,7 @@ suffix: ""                       # keep in sync with NB1 suffix
 # ---------------------------------------------------------------------------
 dataset:   "cifar10"             # 10 classes, 50 000 train / 10 000 test
 arch:      "resnet18"            # paper: ResNet-18 on CIFAR-10
-data_path: "./data"
+data_path: "/kaggle/input/datasets/kiethe/standard-cifar-10"
 
 # ---------------------------------------------------------------------------
 # Protocol
@@ -41,17 +41,18 @@ TEST_EPOCHS_SCALE: 0.1
 # ---------------------------------------------------------------------------
 # Output directories
 # ---------------------------------------------------------------------------
-pretrain_dir: "./checkpoints/pretrain"
-splits_dir:   "./checkpoints/splits"
-oracle_dir:   "./checkpoints/oracle"
-results_dir:  "./results"
+# Kaggle: NB1 artifacts are in the flat dataset folder (no subdirectories)
+pretrain_dir: "/kaggle/input/datasets/kiethe/standard-cifar-10"
+splits_dir:   "/kaggle/input/datasets/kiethe/standard-cifar-10"
+oracle_dir:   "/kaggle/working/checkpoints/oracle"
+results_dir:  "/kaggle/working/results"
 
 # ---------------------------------------------------------------------------
 # DataLoader settings  (Table 4: batch=128)
 # ---------------------------------------------------------------------------
 batch_size:      128
 test_batch_size: 256
-num_workers:     4
+num_workers:     2          # Kaggle kernels typically have 2 CPU cores
 
 # ---------------------------------------------------------------------------
 # Hyperparameter overrides  (null → paper_hparams.RETRAIN_CFG defaults)
