@@ -265,24 +265,8 @@ class ModelModule(pl.LightningModule):
         self.CMFweights.weight.copy_(means)
         self.CMFweights.mu.copy_(mu)
 
-        # —— optionaldegree —— 
-        W = self.CMFweights.weight                 # [K, D]
-        H = means  
-
-        Wn = F.normalize(W, dim=1)
-        Hn = F.normalize(H, dim=1)
-
-        Wn_safe = Wn.clone(); Wn_safe[~mask] = 0.0
-        Hn_safe = Hn.clone(); Hn_safe[~mask] = 0.0
-        G_WW = Wn_safe @ Wn_safe.t()
-        G_HH = Hn_safe @ Hn_safe.t()
-        G_WH = Wn_safe @ Hn_safe.t()   
-
-        print("mean G_WW:", G_WW.mean().item())
-        print("mean G_HH:", G_HH.mean().item())
-        print("mean G_WH:", G_WH.mean().item())
-
-        return Wn.detach().cpu().numpy(), Hn.detach().cpu().numpy(), G_WW.detach().cpu().numpy(), G_HH.detach().cpu().numpy(), G_WH.detach().cpu().numpy()
+        # restore training mode so the next train() epoch is unaffected
+        self.train()
 
         
             
