@@ -12,7 +12,10 @@ def train(args, model, device, train_loader, optimizer, epoch, mode = "descent",
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
-        loss = F.nll_loss(output, target)
+        if hasattr(model, "do_log_softmax") and getattr(model, "do_log_softmax"):
+            loss = F.nll_loss(output, target)
+        else:
+            loss = F.cross_entropy(output, target)
         loss.backward()
         if mode == "ascent":
             for param in model.parameters():

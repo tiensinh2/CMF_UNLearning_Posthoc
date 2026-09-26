@@ -722,7 +722,10 @@ def test(model, device, data_loader,  unlearn_class_list, class_label_names, num
         for data, target in data_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
-            sample_loss = F.nll_loss(output, target, reduction='none')#.item()  # sum up batch loss
+            if hasattr(model, "do_log_softmax") and getattr(model, "do_log_softmax"):
+                sample_loss = F.nll_loss(output, target, reduction='none')
+            else:
+                sample_loss = F.cross_entropy(output, target, reduction='none')
             for i in range(num_classes):
                 dict_classwise_loss[i] +=  torch.where(target == i, sample_loss, torch.zeros_like(sample_loss)).sum()
             pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability

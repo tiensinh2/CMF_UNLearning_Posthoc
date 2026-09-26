@@ -324,9 +324,8 @@ def unified_linear_probe(args, model, train_loader, test_loader,
     #mod = dict(model.named_modules()).get(resolved, None)
     #print("[LP] resolved module =", type(mod), mod)
 
-    # extractgetfeature（train/test notpollute）
-    if "CMF" in args.unlearn_method:
-        #print(f"[LP] Using CMF geometry feature extraction for layer={resolved}, pool={pool}, device={device}")
+    # extract features
+    if "CMF" in getattr(args, "unlearn_method", "") or getattr(args, "CMFClassifier", False) or hasattr(model, "_preprocess_feats_for_cmf"):
         Xtr, ytr = _extract_cmf_geometry_features(model, train_loader, device)
         Xte, yte = _extract_cmf_geometry_features(model, test_loader,  device)
         d_tr, d_te = Xtr.size(1), Xte.size(1)
