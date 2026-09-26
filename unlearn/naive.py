@@ -21,15 +21,10 @@ def unlearn_naive(args, model, device, retain_loader, forget_loader, train_loade
 
     method = args.unlearn_method
     clip = args.grad_norm_clip
-    forget_dataset = forget_loader.dataset
-    forget_dataset, _ = torch.utils.data.random_split(
-        forget_dataset, [args.num_forget_samples, len(forget_dataset) - args.num_forget_samples]
-    )
-    retain_dataset = retain_loader.dataset
-    retain_dataset, _ = torch.utils.data.random_split(
-        retain_dataset, [args.num_retain_samples, len(retain_dataset) - args.num_retain_samples]
-    )
-    naive_retain_loader = torch.utils.data.DataLoader(retain_dataset, batch_size=args.batch_size, shuffle=True)
+    # Use the full forget/retain loaders directly — random_split with the
+    # exact dataset length (num_forget/retain_samples == len(dataset)) would
+    # produce a zero-size remainder that makes the forget_iterator hang.
+    naive_retain_loader = retain_loader
     
     test(model, device, test_loader,
          args.unlearn_class, args.class_label_names, args.num_classes,
@@ -257,28 +252,12 @@ def unlearn_naive_CMF(
     # -------------------------
     # Create forget/retain subsets
     # -------------------------
-    forget_dataset = forget_loader.dataset
-    forget_dataset, _ = torch.utils.data.random_split(
-        forget_dataset,
-        [args.num_forget_samples, len(forget_dataset) - args.num_forget_samples]
-    )
-    naive_forget_loader = torch.utils.data.DataLoader(
-        forget_dataset,
-        batch_size=args.batch_size,
-        shuffle=True,
-    )
+    # Use the full forget/retain loaders directly — random_split with the
+    # exact dataset length (num_forget/retain_samples == len(dataset)) would
+    # produce a zero-size remainder that makes forget_iterator hang forever.
+    naive_forget_loader = forget_loader
     forget_iterator = iter(naive_forget_loader)
-
-    retain_dataset = retain_loader.dataset
-    retain_dataset, _ = torch.utils.data.random_split(
-        retain_dataset,
-        [args.num_retain_samples, len(retain_dataset) - args.num_retain_samples]
-    )
-    naive_retain_loader = torch.utils.data.DataLoader(
-        retain_dataset, batch_size=args.batch_size, shuffle=True,
-        pin_memory=True,
-        num_workers=getattr(forget_loader, "num_workers", 2),
-    )
+    naive_retain_loader = retain_loader
 
     # -------------------------
     # Hyperparameters for loss
@@ -301,7 +280,9 @@ def unlearn_naive_CMF(
     # Baseline: eval()  + test() + LP
     # =========================================================
     model.eval()
-    model.recompute_cmf(train_loader, device=device)
+    # Use retain_loader (not train_loader) so W is anchored on retain-only
+    # geometry even at epoch 0 — forget class features should not define W.
+    model.recompute_cmf(retain_loader, device=device)
 
     # Classifier (CMF head) baseline
     with torch.no_grad():
@@ -432,9 +413,10 @@ def unlearn_naive_CMF(
         # End-of-epoch evaluation
         # -------------------------
         model.eval()
-        # BUG-FIX: do NOT unpack the 5-tuple — recompute_cmf() returns None
-        # in the new pipeline (values are stored internally); just call it plain.
-        model.recompute_cmf(train_loader, device=device)
+        # Recompute W from retain-only features so the CMF classifier is
+        # anchored on the post-unlearning retain geometry, not the full
+        # (retain + forget) training set.
+        model.recompute_cmf(retain_loader, device=device)
 
         # Classifier evaluation\
         with torch.no_grad():

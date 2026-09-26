@@ -8,6 +8,10 @@ def train(args, model, device, train_loader, optimizer, epoch, mode = "descent",
 
     correct = 0
     seen = 0
+    # CMF momentum for online W update (default 0.9 per paper §A.4)
+    _cmf_mom = getattr(getattr(model, "args", args), "CMF_momentum", 0.9)
+    _use_cmf = hasattr(model, "CMFweights")
+
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
@@ -24,6 +28,22 @@ def train(args, model, device, train_loader, optimizer, epoch, mode = "descent",
             if clip is not None:
                 torch.nn.utils.clip_grad_norm_(model.parameters(), clip)
         optimizer.step()
+
+        # ── Online CMF weight update (EMA of per-class feature means) ──────
+        # W is a register_buffer so SGD never touches it.  Update it here
+        # using the current batch features so gradient in the NEXT forward
+        # pass is computed against an up-to-date W.
+        # Uses CMFWeights.update_class_means() which does:
+        #   W_c ← momentum * W_c + (1-momentum) * batch_mean_c  (no normalize)
+        # We then normalize W so each row is a unit vector.
+        if _use_cmf:
+            with torch.no_grad():
+                feats = model.extract_features(data)
+                feats_n = torch.nn.functional.normalize(feats, dim=1)
+                model.CMFweights.update_class_means(feats_n, target, _cmf_mom)
+                model.CMFweights.weight.copy_(
+                    torch.nn.functional.normalize(model.CMFweights.weight, dim=1)
+                )
 
         bs = target.size(0)
         loss_sum += loss.detach().item() * bs
