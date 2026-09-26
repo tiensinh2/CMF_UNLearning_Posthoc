@@ -22,7 +22,7 @@ suffix: ""                       # keep in sync with NB1 suffix
 # ---------------------------------------------------------------------------
 dataset:   "cifar100"            # 100 classes, 50 000 train / 10 000 test
 arch:      "resnet18"            # paper: ResNet-18 on CIFAR-100
-data_path: "/kaggle/input/standard-cifar-100"
+data_path: "/kaggle/input/datasets/kiethe/standard-cifar-100"
 
 # ---------------------------------------------------------------------------
 # Protocol
@@ -58,8 +58,8 @@ methods:
 # Output directories
 # ---------------------------------------------------------------------------
 # Kaggle: NB1 artifacts (pretrain + splits) are in the flat dataset folder.
-pretrain_dir:    "/kaggle/input/standard-cifar-100"
-splits_dir:      "/kaggle/input/standard-cifar-100"
+pretrain_dir:    "/kaggle/input/datasets/kiethe/standard-cifar-100"
+splits_dir:      "/kaggle/input/datasets/kiethe/standard-cifar-100"
 unlearn_no_cmf_dir: "/kaggle/working/checkpoints/unlearn_no_cmf"
 results_dir:     "/kaggle/working/results"
 
