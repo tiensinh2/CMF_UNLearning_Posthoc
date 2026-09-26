@@ -53,4 +53,4 @@ num_workers:     4
 # ---------------------------------------------------------------------------
 hparam_overrides:
   # epochs: 50            # ablation: shorten training
-  # warmup_epochs: 0      # ablation: no warmup
+  warmup_epochs: 0        # no warmup
