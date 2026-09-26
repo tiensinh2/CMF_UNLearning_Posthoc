@@ -534,7 +534,10 @@ def get_retain_forget_partition(args, dataset, unlearn_class_list, return_ind = 
 
 
 def get_model(args,device):
-    if "CMF" in args.unlearn_method:
+    # Use ModelModule whenever CMFClassifier is enabled on args (covers
+    # pre_train / oracle paths where unlearn_method is not "CMF*" but the
+    # model is still a CMF wrapper with encoder.* keys).
+    if "CMF" in args.unlearn_method or getattr(args, "CMFClassifier", False):
         model  = ModelModule(args).to(device)
     else:
         model = get_init_model(args, device)
